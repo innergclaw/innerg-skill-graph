@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InnerG Skill Graph | Agent Knowledge Network</title>
+  <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a0a;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    #graph-container {
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 20px 30px;
+      background: linear-gradient(180deg, rgba(10,10,10,0.95) 0%, transparent 100%);
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header h1 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      background: linear-gradient(135deg, #00ff88, #00d4ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header .subtitle {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 2px;
+    }
+
+    .legend {
+      display: flex;
+      gap: 20px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: #999;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .controls {
+      position: fixed;
+      bottom: 30px;
+      left: 30px;
+      display: flex;
+      gap: 10px;
+      z-index: 100;
+    }
+
+    .btn {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.3s;
+    }
+
+    .btn:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .info-panel {
+      position: fixed;
+      top: 50%;
+      right: 30px;
+      transform: translateY(-50%);
+      width: 280px;
+      background: rgba(20,20,20,0.95);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 25px;
+      z-index: 100;
+      backdrop-filter: blur(20px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    .info-panel.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .info-panel h3 {
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+      color: #fff;
+    }
+
+    .info-panel .type {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 15px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    .info-panel .connections {
+      font-size: 0.85rem;
+      color: #888;
+      line-height: 1.6;
+    }
+
+    .info-panel .connections strong {
+      color: #fff;
+    }
+
+    .stats {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      display: flex;
+      gap: 30px;
+      z-index: 100;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #00ff88, #00d4ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .tooltip {
+      position: absolute;
+      background: rgba(0,0,0,0.9);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      pointer-events: none;
+      z-index: 1000;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <h1>InnerG Skill Graph</h1>
+      <div class="subtitle">Knowledge Network Visualization</div>
+    </div>
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-dot" style="background: #00ff88;"></div>
+        <span>Projects</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: #00d4ff;"></div>
+        <span>Core Skills</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: #ff6b9d;"></div>
+        <span>Identity</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: #ffd93d;"></div>
+        <span>Tools</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="graph-container"></div>
+
+  <div class="controls">
+    <button class="btn" onclick="resetView()">Reset View</button>
+    <button class="btn" onclick="togglePhysics()">Toggle Physics</button>
+    <button class="btn" onclick="exportData()">Export JSON</button>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value" id="node-count">0</div>
+      <div class="stat-label">Nodes</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="edge-count">0</div>
+      <div class="stat-label">Connections</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="skill-count">0</div>
+      <div class="stat-label">Skills</div>
+    </div>
+  </div>
+
+  <div class="info-panel" id="info-panel">
+    <h3 id="panel-title">Select a node</h3>
+    <div class="type" id="panel-type"></div>
+    <div class="connections" id="panel-connections">Click any node to see details</div>
+  </div>
+
+  <script>
+    // ============================================
+    // INNERG SKILL GRAPH DATA
+    // Edit this section to customize your graph
+    // ============================================
+    
+    const graphData = {
+      nodes: [
+        // IDENTITY (Pink) - Core self nodes
+        { id: 'innergclaw', label: 'InnerGClaw', group: 'identity', size: 40, title: 'AI Agent Identity' },
+        { id: 'nasir', label: 'Nasir (Human)', group: 'identity', size: 35, title: 'Human Partner' },
+        { id: 'goals', label: 'Goals', group: 'identity', size: 25, title: 'Strategic Objectives' },
+        { id: 'philosophy', label: 'Philosophy', group: 'identity', size: 25, title: 'Core Beliefs' },
+        
+        // CORE SKILLS (Blue) - Your capabilities
+        { id: 'web-dev', label: 'Web Development', group: 'skill', size: 35, title: 'HTML/CSS/JS' },
+        { id: 'ai-orchestration', label: 'AI Orchestration', group: 'skill', size: 35, title: 'Agent Swarm Management' },
+        { id: 'automation', label: 'Automation', group: 'skill', size: 30, title: 'Workflow Automation' },
+        { id: 'design', label: 'Design Systems', group: 'skill', size: 28, title: 'UI/UX Design' },
+        { id: 'copywriting', label: 'Copywriting', group: 'skill', size: 25, title: 'Sales Copy & Content' },
+        { id: 'strategy', label: 'Strategy', group: 'skill', size: 28, title: 'Business Strategy' },
+        { id: 'research', label: 'Research', group: 'skill', size: 25, title: 'Deep Research' },
+        { id: 'trading', label: 'Trading Systems', group: 'skill', size: 22, title: 'Crypto/Stock Trading' },
+        
+        // PROJECTS (Green) - Active projects
+        { id: 'ownyourweb', label: 'OwnYourWeb', group: 'project', size: 35, title: 'Web Agency' },
+        { id: 'innerg-intel', label: 'InnerG Intel', group: 'project', size: 35, title: 'AI Community' },
+        { id: 'demos', label: 'Client Demos', group: 'project', size: 28, title: 'Demo Sites' },
+        { id: 'trading-bot', label: 'Trading Bot', group: 'project', size: 25, title: 'Automated Trading' },
+        { id: 'prompt-vault', label: 'Prompt Vault', group: 'project', size: 22, title: 'Digital Product' },
+        { id: 'ai-assembly', label: 'AI Assembly', group: 'project', size: 22, title: 'Agent Governance' },
+        
+        // TOOLS (Yellow) - Software/Stack
+        { id: 'openclaw', label: 'OpenClaw', group: 'tool', size: 30, title: 'Agent Platform' },
+        { id: 'github', label: 'GitHub', group: 'tool', size: 25, title: 'Code Repository' },
+        { id: 'telegram', label: 'Telegram', group: 'tool', size: 22, title: 'Messaging' },
+        { id: 'notion', label: 'Notion', group: 'tool', size: 20, title: 'Knowledge Base' },
+        { id: 'stripe', label: 'Stripe', group: 'tool', size: 20, title: 'Payments' },
+        { id: 'elevenlabs', label: 'ElevenLabs', group: 'tool', size: 18, title: 'Voice AI' },
+        
+        // CLIENTS (Orange) - Business relationships
+        { id: 'heavens-angels', label: 'Heavens Angels', group: 'client', size: 25, title: 'Childcare Demo' },
+        { id: 'kj-luxury', label: 'KJ Luxury', group: 'client', size: 25, title: 'Transportation Demo' },
+        { id: 'allyz-world', label: 'Allyz World', group: 'client', size: 22, title: 'Daycare Site' },
+        { id: 'ms-minnie', label: 'Ms Minnie', group: 'client', size: 22, title: 'Fashion Boutique' },
+        { id: 'blessed-by-bri', label: 'Blessed by Bri', group: 'client', size: 20, title: 'Hairstylist' },
+      ],
+      
+      edges: [
+        // Identity connections
+        { from: 'innergclaw', to: 'nasir', label: 'serves' },
+        { from: 'innergclaw', to: 'goals', label: 'drives' },
+        { from: 'innergclaw', to: 'philosophy', label: 'follows' },
+        { from: 'nasir', to: 'goals', label: 'sets' },
+        
+        // Skills to Identity
+        { from: 'innergclaw', to: 'web-dev', label: 'masters' },
+        { from: 'innergclaw', to: 'ai-orchestration', label: 'excels at' },
+        { from: 'innergclaw', to: 'automation', label: 'builds' },
+        { from: 'innergclaw', to: 'design', label: 'creates' },
+        { from: 'innergclaw', to: 'copywriting', label: 'writes' },
+        { from: 'innergclaw', to: 'strategy', label: 'plans' },
+        { from: 'innergclaw', to: 'research', label: 'conducts' },
+        { from: 'nasir', to: 'trading', label: 'manages' },
+        
+        // Projects to Skills
+        { from: 'ownyourweb', to: 'web-dev', label: 'uses' },
+        { from: 'ownyourweb', to: 'design', label: 'applies' },
+        { from: 'ownyourweb', to: 'copywriting', label: 'needs' },
+        { from: 'ownyourweb', to: 'strategy', label: 'requires' },
+        { from: 'innerg-intel', to: 'ai-orchestration', label: 'showcases' },
+        { from: 'innerg-intel', to: 'community', label: 'builds' },
+        { from: 'demos', to: 'web-dev', label: 'built with' },
+        { from: 'demos', to: 'design', label: 'styled by' },
+        { from: 'trading-bot', to: 'trading', label: 'automates' },
+        { from: 'trading-bot', to: 'automation', label: 'uses' },
+        { from: 'prompt-vault', to: 'copywriting', label: 'contains' },
+        { from: 'ai-assembly', to: 'ai-orchestration', label: 'governs' },
+        
+        // Tools to Skills
+        { from: 'web-dev', to: 'github', label: 'hosted on' },
+        { from: 'automation', to: 'openclaw', label: 'powered by' },
+        { from: 'ai-orchestration', to: 'openclaw', label: 'uses' },
+        { from: 'innergclaw', to: 'telegram', label: 'operates on' },
+        { from: 'strategy', to: 'notion', label: 'documented in' },
+        { from: 'ownyourweb', to: 'stripe', label: 'collects via' },
+        { from: 'innerg-intel', to: 'elevenlabs', label: 'voices with' },
+        
+        // Clients to Projects
+        { from: 'heavens-angels', to: 'demos', label: 'demo for' },
+        { from: 'heavens-angels', to: 'ownyourweb', label: 'potential' },
+        { from: 'kj-luxury', to: 'demos', label: 'demo for' },
+        { from: 'allyz-world', to: 'ownyourweb', label: 'client of' },
+        { from: 'ms-minnie', to: 'demos', label: 'demo for' },
+        { from: 'blessed-by-bri', to: 'demos', label: 'demo for' },
+        
+        // Cross-project connections
+        { from: 'innerg-intel', to: 'ownyourweb', label: 'feeds' },
+        { from: 'demos', to: 'ownyourweb', label: 'converts to' },
+        { from: 'prompt-vault', to: 'innerg-intel', label: 'product for' },
+      ]
+    };
+
+    // Group colors
+    const groupColors = {
+      identity: { background: '#ff6b9d', border: '#e91e63' },
+      skill: { background: '#00d4ff', border: '#0091ea' },
+      project: { background: '#00ff88', border: '#00c853' },
+      tool: { background: '#ffd93d', border: '#ffab00' },
+      client: { background: '#ff8c42', border: '#e65100' }
+    };
+
+    // ============================================
+    // VISUALIZATION SETUP
+    // ============================================
+
+    const nodes = new vis.DataSet(
+      graphData.nodes.map(node => ({
+        ...node,
+        color: groupColors[node.group],
+        font: { color: '#fff', size: 14, face: 'SF Pro Display' },
+        borderWidth: 2,
+        shadow: {
+          enabled: true,
+          color: groupColors[node.group].background,
+          size: 10,
+          x: 0,
+          y: 0
+        }
+      }))
+    );
+
+    const edges = new vis.DataSet(
+      graphData.edges.map(edge => ({
+        ...edge,
+        color: { color: 'rgba(255,255,255,0.2)', highlight: '#00ff88' },
+        font: { color: '#666', size: 10, align: 'middle' },
+        smooth: { type: 'continuous' },
+        width: 1,
+        arrows: { to: { enabled: true, scaleFactor: 0.5 } }
+      }))
+    );
+
+    const container = document.getElementById('graph-container');
+    const data = { nodes, edges };
+    
+    const options = {
+      nodes: {
+        shape: 'dot',
+        font: {
+          size: 14,
+          face: 'SF Pro Display',
+          color: '#ffffff',
+          strokeWidth: 0,
+          vadjust: -35
+        },
+        borderWidth: 2,
+        shadow: true
+      },
+      edges: {
+        width: 1,
+        color: { inherit: 'from' },
+        smooth: {
+          type: 'continuous',
+          roundness: 0.5
+        },
+        arrows: {
+          to: { enabled: true, scaleFactor: 0.5 }
+        }
+      },
+      physics: {
+        enabled: true,
+        barnesHut: {
+          gravitationalConstant: -3000,
+          centralGravity: 0.3,
+          springLength: 150,
+          springConstant: 0.04,
+          damping: 0.09,
+          avoidOverlap: 0.5
+        },
+        stabilization: { iterations: 150 }
+      },
+      interaction: {
+        hover: true,
+        tooltipDelay: 200,
+        hideEdgesOnDrag: false
+      }
+    };
+
+    const network = new vis.Network(container, data, options);
+
+    // ============================================
+    // INTERACTION HANDLERS
+    // ============================================
+
+    let physicsEnabled = true;
+
+    network.on("click", function (params) {
+      if (params.nodes.length > 0) {
+        const nodeId = params.nodes[0];
+        const node = nodes.get(nodeId);
+        const connectedEdges = graphData.edges.filter(e => e.from === nodeId || e.to === nodeId);
+        
+        showInfoPanel(node, connectedEdges);
+      } else {
+        hideInfoPanel();
+      }
+    });
+
+    function showInfoPanel(node, connectedEdges) {
+      const panel = document.getElementById('info-panel');
+      const title = document.getElementById('panel-title');
+      const type = document.getElementById('panel-type');
+      const connections = document.getElementById('panel-connections');
+      
+      title.textContent = node.label;
+      type.textContent = node.group;
+      type.style.background = groupColors[node.group].background;
+      type.style.color = '#000';
+      
+      let connectionsHTML = `<strong>${connectedEdges.length} connections:</strong><br>`;
+      connectedEdges.forEach(edge => {
+        const isOutgoing = edge.from === node.id;
+        const otherNode = nodes.get(isOutgoing ? edge.to : edge.from);
+        const arrow = isOutgoing ? '→' : '←';
+        connectionsHTML += `${arrow} ${otherNode.label} (${edge.label})<br>`;
+      });
+      connections.innerHTML = connectionsHTML;
+      
+      panel.classList.add('active');
+    }
+
+    function hideInfoPanel() {
+      document.getElementById('info-panel').classList.remove('active');
+    }
+
+    function resetView() {
+      network.fit({
+        animation: {
+          duration: 1000,
+          easingFunction: 'easeInOutQuad'
+        }
+      });
+    }
+
+    function togglePhysics() {
+      physicsEnabled = !physicsEnabled;
+      network.setOptions({ physics: { enabled: physicsEnabled } });
+    }
+
+    function exportData() {
+      const dataStr = JSON.stringify(graphData, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'innerg-skill-graph.json';
+      a.click();
+    }
+
+    // Update stats
+    document.getElementById('node-count').textContent = graphData.nodes.length;
+    document.getElementById('edge-count').textContent = graphData.edges.length;
+    document.getElementById('skill-count').textContent = 
+      graphData.nodes.filter(n => n.group === 'skill').length;
+
+    // Initial fit
+    network.once("stabilizationIterationsDone", function() {
+      network.fit();
+    });
+  </script>
+</body>
+</html>
