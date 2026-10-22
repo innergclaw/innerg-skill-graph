@@ -1,515 +1,180 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>InnerG Skill Graph | Agent Knowledge Network</title>
-  <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #0a0a0a;
-      color: #fff;
-      overflow: hidden;
-    }
-
-    #graph-container {
-      width: 100vw;
-      height: 100vh;
-    }
-
-    .header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      padding: 20px 30px;
-      background: linear-gradient(180deg, rgba(10,10,10,0.95) 0%, transparent 100%);
-      z-index: 100;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .header h1 {
-      font-size: 1.3rem;
-      font-weight: 600;
-      background: linear-gradient(135deg, #00ff88, #00d4ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .header .subtitle {
-      font-size: 0.85rem;
-      color: #666;
-      margin-top: 2px;
-    }
-
-    .legend {
-      display: flex;
-      gap: 20px;
-    }
-
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.8rem;
-      color: #999;
-    }
-
-    .legend-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-    }
-
-    .controls {
-      position: fixed;
-      bottom: 30px;
-      left: 30px;
-      display: flex;
-      gap: 10px;
-      z-index: 100;
-    }
-
-    .btn {
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.2);
-      color: #fff;
-      padding: 10px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      transition: all 0.3s;
-    }
-
-    .btn:hover {
-      background: rgba(255,255,255,0.2);
-    }
-
-    .info-panel {
-      position: fixed;
-      top: 50%;
-      right: 30px;
-      transform: translateY(-50%);
-      width: 280px;
-      background: rgba(20,20,20,0.95);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 16px;
-      padding: 25px;
-      z-index: 100;
-      backdrop-filter: blur(20px);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s;
-    }
-
-    .info-panel.active {
-      opacity: 1;
-      pointer-events: all;
-    }
-
-    .info-panel h3 {
-      font-size: 1.1rem;
-      margin-bottom: 10px;
-      color: #fff;
-    }
-
-    .info-panel .type {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: 15px;
-      padding: 4px 10px;
-      border-radius: 4px;
-      display: inline-block;
-    }
-
-    .info-panel .connections {
-      font-size: 0.85rem;
-      color: #888;
-      line-height: 1.6;
-    }
-
-    .info-panel .connections strong {
-      color: #fff;
-    }
-
-    .stats {
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      display: flex;
-      gap: 30px;
-      z-index: 100;
-    }
-
-    .stat {
-      text-align: center;
-    }
-
-    .stat-value {
-      font-size: 1.8rem;
-      font-weight: 700;
-      background: linear-gradient(135deg, #00ff88, #00d4ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .stat-label {
-      font-size: 0.75rem;
-      color: #666;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-    }
-
-    .tooltip {
-      position: absolute;
-      background: rgba(0,0,0,0.9);
-      color: #fff;
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      pointer-events: none;
-      z-index: 1000;
-      border: 1px solid rgba(255,255,255,0.1);
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚡️ InnerG Skill Graph ~ Nasirr "Nas" Mayo</title>
+<meta name="description" content="Interactive map of Nasirr 'Nas' Mayo's skills, InnerG ecosystem, clients, SI teammates and stack. Human-led, SI-partnered.">
+<script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
+<style>
+:root{--bg:#07070c;--panel:rgba(16,16,28,.92);--line:#262640;--text:#ecebff;--muted:#9a99b8;--accent:#f5c542;--accent2:#8b5cf6}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:radial-gradient(ellipse at 30% 20%,#1a1033 0%,var(--bg) 60%);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;overflow:hidden}
+#graph{position:fixed;inset:0}
+header{position:fixed;top:0;left:0;right:0;z-index:10;display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 16px;background:linear-gradient(180deg,rgba(7,7,12,.95),rgba(7,7,12,0));pointer-events:none}
+header>*{pointer-events:auto}
+.brand{font-weight:800;font-size:18px;letter-spacing:.5px;margin-right:auto}
+.brand span{color:var(--accent)}
+.brand small{display:block;font-weight:400;font-size:12px;color:var(--muted);letter-spacing:0}
+input,button{font:inherit;color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+input{width:200px}
+button{cursor:pointer}button:hover,button.on{border-color:var(--accent);color:var(--accent)}
+#legend{position:fixed;left:16px;bottom:16px;z-index:10;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;font-size:13px;backdrop-filter:blur(8px)}
+#legend b{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px}
+.lg{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;padding:2px 4px;border-radius:6px}
+.lg:hover{background:#ffffff10}.lg.off{opacity:.35}
+.dot{width:11px;height:11px;border-radius:50%}
+#panel{position:fixed;top:72px;right:16px;bottom:16px;width:340px;z-index:11;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;overflow:auto;transform:translateX(120%);transition:transform .25s ease;backdrop-filter:blur(10px)}
+#panel.open{transform:none}
+#panel h2{font-size:20px;margin:6px 0}
+#panel .tag{display:inline-block;font-size:11px;text-transform:uppercase;letter-spacing:1px;padding:2px 8px;border-radius:999px}
+#panel p{color:#cfcde8;line-height:1.5;font-size:14px;margin:8px 0}
+#panel h3{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:16px 0 6px}
+#panel a{color:var(--accent);word-break:break-all;font-size:14px}
+#panel ul{list-style:none}#panel li{padding:5px 0;border-bottom:1px solid #ffffff0d;font-size:14px;cursor:pointer}
+#panel li:hover{color:var(--accent)}#panel li em{color:var(--muted);font-style:normal;font-size:12px}
+#close{position:absolute;top:10px;right:10px;padding:2px 9px}
+#stats{position:fixed;right:16px;bottom:16px;z-index:9;font-size:12px;color:var(--muted)}
+@media(max-width:700px){.brand{width:100%}input{flex:1;width:auto}
+#panel{top:auto;left:8px;right:8px;bottom:8px;width:auto;max-height:55vh;transform:translateY(120%)}
+#legend{bottom:8px;left:8px;font-size:12px;padding:8px;flex-direction:row;flex-wrap:wrap;right:8px}#legend b{width:100%}#stats{display:none}}
+</style>
 </head>
 <body>
-  <div class="header">
-    <div>
-      <h1>InnerG Skill Graph</h1>
-      <div class="subtitle">Knowledge Network Visualization</div>
-    </div>
-    <div class="legend">
-      <div class="legend-item">
-        <div class="legend-dot" style="background: #00ff88;"></div>
-        <span>Projects</span>
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="background: #00d4ff;"></div>
-        <span>Core Skills</span>
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="background: #ff6b9d;"></div>
-        <span>Identity</span>
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="background: #ffd93d;"></div>
-        <span>Tools</span>
-      </div>
-    </div>
-  </div>
+<header>
+  <div class="brand"><span>⚡️</span> InnerG Skill Graph<small>Nasirr "Nas" Mayo ~ human-led, SI-partnered</small></div>
+  <input id="search" placeholder="Search nodes..." autocomplete="off">
+  <button id="viewBtn" title="Switch layout">Competency view</button>
+  <button id="physBtn">Freeze</button>
+  <button id="resetBtn">Reset</button>
+  <button id="exportBtn">JSON</button>
+</header>
+<div id="graph"></div>
+<div id="legend"><b>Groups (tap to filter)</b></div>
+<aside id="panel"><button id="close">✕</button><div id="pbody"></div></aside>
+<div id="stats"></div>
+<script>
+// ⚡️ Edit this data to update the graph. Groups: core, venture, client, agent, skill, tool, legacy
+const groups = {
+  core:    {label:'Core',          color:'#f5c542'},
+  venture: {label:'InnerG Ecosystem',color:'#8b5cf6'},
+  client:  {label:'Clients',       color:'#fb923c'},
+  agent:   {label:'SI Teammates',  color:'#22d3ee'},
+  skill:   {label:'Skills',        color:'#34d399'},
+  tool:    {label:'Stack',         color:'#94a3b8'},
+  legacy:  {label:'Legacy',        color:'#4b4b63'}
+};
+const GH='https://github.com/innergclaw/';
+const graphData = {
+nodes: [
+ {id:'nas',label:'Nas (Mr G)',group:'core',size:46,desc:'Nasirr "Nas" Mayo ~ founder of the InnerG ecosystem. Builder, designer, teacher and writer from Philadelphia. Every system here is human-led, with SI as partner.',links:[['Home Base','https://nasirr.innergintel.org/'],['GitHub','https://github.com/innergclaw']]},
+ {id:'homebase',label:'Home Base',group:'core',size:28,desc:'Personal hub: nasirr.innergintel.org. Hosts INNERG ID pages and the Market Pulse section.',links:[['nasirr.innergintel.org','https://nasirr.innergintel.org/']]},
+ // ecosystem
+ {id:'intel',label:'InnerG Intel',group:'venture',size:36,desc:'Parent brand and media arm: SI education, agentic workflows, research and briefings. YouTube @innergintel, X @InnerGIntel.',links:[['YouTube @innergintel','https://www.youtube.com/@innergintel'],['Ecosystem hub','http://www.innergeco.online/']]},
+ {id:'learn',label:'InnerG Learn',group:'venture',size:26,desc:'Learning hub for InnerG courses and lessons.',links:[['Site','https://innergclaw.github.io/innerg-learn/'],['Repo',GH+'innerg-learn']]},
+ {id:'academy',label:'Agent Academy',group:'venture',size:26,desc:'InnerG Agent Academy ~ 21-day beta teaching people to work with SI agents.',links:[['Site','https://innergclaw.github.io/innerg-agent-academy/'],['Repo',GH+'innerg-agent-academy']]},
+ {id:'phillysi',label:'Philly SI Program',group:'venture',size:22,desc:'Local superintelligence education program in Philadelphia.',links:[['Signup','https://innergclaw.github.io/innerg-ai-program-signup/']]},
+ {id:'reads',label:'InnerG Reads',group:'venture',size:28,desc:'Publishing imprint with short reads and books by Nasirr Mayo.',links:[['innergreads.study','https://www.innergreads.study/']]},
+ {id:'book',label:'Legacy In Ink',group:'venture',size:22,desc:'Legacy In Ink: The Final Frequency ~ InnerG Reads Release 001 (2026).',links:[['Book site','https://innergclaw.github.io/legacy-in-ink-final-frequency/'],['Amazon','https://www.amazon.com/dp/B0HC2WTW1G']]},
+ {id:'pulse',label:'INNERG PULSE',group:'venture',size:26,desc:'InnerG Market Pulse ~ financial literacy, stocks and crypto research, watchlists. Research only, not financial advice.',links:[['Watchlist','https://innergclaw.github.io/innerg-watchlist/']]},
+ {id:'innergid',label:'INNERG ID',group:'venture',size:28,desc:'Family program for grades 3 to 12 plus parents, with Child, Parent and Family plans and the InnerG Library. Also the member identity layer.',links:[['Plans','https://nasirr.innergintel.org/innergid/'],['For parents','https://nasirr.innergintel.org/innergid/about/']]},
+ {id:'library',label:'InnerG Library',group:'venture',size:18,desc:'Learning library included with INNERG ID memberships.',links:[]},
+ {id:'oyw',label:'OwnYourWeb Systems',group:'venture',size:32,desc:'Websites and systems for small businesses. "Your website. Your server. Your control." Parent of SHOPNASGFX.',links:[['ownyourweb.xyz','https://ownyourweb.xyz/'],['SMM Tier 1','https://ownyourweb.marketing/']]},
+ {id:'shop',label:'SHOPNASGFX',group:'venture',size:28,desc:'Design studio for logos, branding and social media. Lineage: NGVISIONS ~ NasGfx ~ SHOPNASGFX.',links:[['shopnasgfx.com','https://shopnasgfx.com/'],['Portfolio','https://innergclaw.github.io/shopnasgfx-portfolio/']]},
+ // clients
+ {id:'aam',label:'African American Market',group:'client',size:22,desc:'African American Market at FDR Park, Philadelphia (also called FDR Market). Social content, promo graphics, events.',links:[['aamarketphilly.com','https://aamarketphilly.com/']]},
+ {id:'src',label:"SR Children's Lounge",group:'client',size:20,desc:'Website and business maintenance.',links:[['srchildrenslounge.com','https://srchildrenslounge.com/']]},
+ {id:'hof',label:'Hand Over Fist Ent.',group:'client',size:20,desc:'Hands Over First / Hand Over Fist Entertainment ~ brand support, including the NICKLE NINE NEET artist site.',links:[['nicklenineneet.com','https://nicklenineneet.com/']]},
+ {id:'boxing',label:'10 for 10 Boxing',group:'client',size:20,desc:'Philadelphia boxing gym. Site, logo kit and discount signup.',links:[['10for10boxing.com','https://10for10boxing.com/']]},
+ {id:'demos',label:'Client Demos',group:'client',size:18,desc:'Demo and starter sites built for small businesses (Heavens Angels, Blessed by Bri, Allyz World and more).',links:[['Heavens Angels',GH+'heavens-angels-demo'],['Blessed by Bri',GH+'blessedbybri-demo'],['Allyz World','http://www.allyzworldofknowledge.com/']]},
+ // agents
+ {id:'marrow',label:'MARROW',group:'agent',size:28,desc:'Grok Bot lead teammate: ops, engineering and routing. Keeps the brains current and reports to Mr G. X @innergmarrow.',links:[]},
+ {id:'studio',label:'InnerG Studio',group:'agent',size:22,desc:'Content and video teammate: plans YouTube assets and edits footage.',links:[]},
+ {id:'a-pulse',label:'Market Pulse',group:'agent',size:20,desc:'Researches and summarizes markets; maintains the watchlist feed. Never trades.',links:[]},
+ {id:'a-lab',label:'Trading Lab',group:'agent',size:20,desc:'Tests and documents trading ideas. Never places live trades.',links:[]},
+ {id:'a-niche',label:'Niche Lab',group:'agent',size:20,desc:'Finds and grows small niche online businesses under OwnYourWeb Systems.',links:[]},
+ {id:'a-editor',label:'Final Frequency Editor',group:'agent',size:20,desc:'Editorial teammate for InnerG Reads and Legacy In Ink.',links:[]},
+ {id:'a-soc',label:'SOC Coach',group:'agent',size:20,desc:'Coaching teammate for security operations as Nas starts a SOC role.',links:[]},
+ // skills
+ {id:'s-web',label:'Web Development',group:'skill',size:28,desc:'Static sites, GitHub Pages, Supabase backends.',links:[]},
+ {id:'s-design',label:'Design',group:'skill',size:26,desc:'Logos, brand systems, UI.',links:[]},
+ {id:'s-si',label:'SI Orchestration',group:'skill',size:28,desc:'Directing a team of SI teammates with clear jobs and approvals.',links:[]},
+ {id:'s-strategy',label:'Strategy',group:'skill',size:24,desc:'Business and brand strategy.',links:[]},
+ {id:'s-teach',label:'Teaching',group:'skill',size:24,desc:'SI education for families, students and builders.',links:[]},
+ {id:'s-write',label:'Writing',group:'skill',size:24,desc:'Books, reads, copy and scripts.',links:[]},
+ {id:'s-trade',label:'Trading Research',group:'skill',size:22,desc:'Markets research and watchlists.',links:[]},
+ {id:'s-soc',label:'Security Operations',group:'skill',size:22,desc:'SOC fundamentals ~ new role starting.',links:[]},
+ // stack
+ {id:'t-gh',label:'GitHub',group:'tool',size:20,desc:'Code home for every project.',links:[['github.com/innergclaw','https://github.com/innergclaw']]},
+ {id:'t-pages',label:'GitHub Pages',group:'tool',size:18,desc:'Hosting for the live sites.',links:[]},
+ {id:'t-supa',label:'Supabase',group:'tool',size:18,desc:'Database and edge functions (INNERG ID, signups).',links:[]},
+ {id:'t-stripe',label:'Stripe',group:'tool',size:16,desc:'Payments.',links:[]},
+ {id:'t-x',label:'X',group:'tool',size:16,desc:'@InnerGIntel, @innergmarrow.',links:[['@InnerGIntel','https://x.com/InnerGIntel']]},
+ {id:'t-substack',label:'Substack',group:'tool',size:16,desc:'Newsletter publishing.',links:[]},
+ {id:'t-discord',label:'Discord',group:'tool',size:16,desc:'Community.',links:[]},
+ {id:'t-yt',label:'YouTube',group:'tool',size:16,desc:'Video channel @innergintel.',links:[['@innergintel','https://www.youtube.com/@innergintel']]},
+ {id:'t-grok',label:'Grok Bot',group:'tool',size:18,desc:'Platform running the SI teammates since 2026-10-14.',links:[]},
+ // legacy
+ {id:'l-old',label:'OpenClaw / Codex / Hermes',group:'legacy',size:16,desc:'Legacy agent setup (InnerGClaw era), replaced by the Grok Bot team on 2026-10-14.',links:[]}
+],
+edges: [
+ ['nas','homebase','home'],['nas','intel','founded'],['nas','oyw','founded'],['nas','marrow','leads'],
+ ['intel','learn','runs'],['intel','academy','runs'],['intel','phillysi','runs'],['intel','reads','imprint'],['intel','pulse','runs'],['intel','innergid','runs'],
+ ['reads','book','publishes'],['innergid','library','includes'],['homebase','innergid','hosts'],['homebase','pulse','shows'],
+ ['oyw','shop','parent of'],['oyw','aam','client'],['oyw','src','client'],['oyw','hof','client'],['oyw','boxing','client'],['oyw','demos','builds'],['shop','aam','graphics'],['shop','boxing','logo kit'],
+ ['marrow','studio','routes'],['marrow','a-pulse','routes'],['marrow','a-lab','routes'],['marrow','a-niche','routes'],['marrow','a-editor','routes'],['marrow','a-soc','routes'],
+ ['studio','intel','content'],['a-pulse','pulse','feeds'],['a-niche','oyw','grows'],['a-editor','book','edits'],['a-soc','s-soc','coaches'],['a-lab','s-trade','tests'],
+ ['nas','s-web','skill'],['nas','s-design','skill'],['nas','s-si','skill'],['nas','s-strategy','skill'],['nas','s-teach','skill'],['nas','s-write','skill'],['nas','s-trade','skill'],['nas','s-soc','skill'],
+ ['s-web','oyw','powers'],['s-design','shop','powers'],['s-si','marrow','directs'],['s-teach','academy','powers'],['s-teach','innergid','powers'],['s-write','reads','powers'],['s-trade','pulse','powers'],
+ ['s-web','t-gh','uses'],['t-gh','t-pages','deploys'],['innergid','t-supa','backend'],['boxing','t-supa','signups'],['oyw','t-stripe','payments'],['intel','t-x','posts'],['pulse','t-substack','publishes'],['intel','t-discord','community'],['intel','t-yt','channel'],['marrow','t-grok','runs on'],
+ ['t-grok','l-old','replaced']
+].map(([from,to,label])=>({from,to,label}))
+};
 
-  <div id="graph-container"></div>
+const C=groups, nodesDS=new vis.DataSet(graphData.nodes.map(({group,...n})=>({...n,cat:group,title:n.label,value:n.size,
+  color:{background:C[group].color,border:'#ffffff40',highlight:{background:C[group].color,border:'#fff'},hover:{background:C[group].color,border:'#fff'}},
+  shape:'dot',size:n.size*0.6,font:{color:'#ecebff',size:group==='core'?18:13,strokeWidth:4,strokeColor:'#07070c'},
+  borderWidth:group==='core'?3:1.5,shadow:{enabled:true,color:C[group].color+'88',size:group==='core'?30:12,x:0,y:0}})));
+const edgesDS=new vis.DataSet(graphData.edges.map((e,i)=>({id:i,...e,title:e.label,label:undefined,color:{color:'#ffffff22',highlight:'#f5c542',hover:'#ffffff88'},width:1.2,smooth:{type:'continuous'}})));
+const net=new vis.Network(document.getElementById('graph'),{nodes:nodesDS,edges:edgesDS},{
+  physics:{solver:'forceAtlas2Based',forceAtlas2Based:{gravitationalConstant:-70,springLength:110,springConstant:.06,damping:.5},stabilization:{iterations:300}},
+  interaction:{hover:true,tooltipDelay:150,navigationButtons:false},layout:{improvedLayout:true}});
+const byId=Object.fromEntries(graphData.nodes.map(n=>[n.id,n]));
+const off=new Set();let radial=false,physics=true;
 
-  <div class="controls">
-    <button class="btn" onclick="resetView()">Reset View</button>
-    <button class="btn" onclick="togglePhysics()">Toggle Physics</button>
-    <button class="btn" onclick="exportData()">Export JSON</button>
-  </div>
+// legend
+const lg=document.getElementById('legend');
+Object.entries(C).forEach(([k,g])=>{const d=document.createElement('div');d.className='lg';d.innerHTML=`<span class="dot" style="background:${g.color}"></span>${g.label} (${graphData.nodes.filter(n=>n.group===k).length})`;
+ d.onclick=()=>{off.has(k)?off.delete(k):off.add(k);d.classList.toggle('off');applyFilter()};lg.appendChild(d)});
+function applyFilter(){const q=document.getElementById('search').value.trim().toLowerCase();
+ nodesDS.update(graphData.nodes.map(n=>{const hit=!q||(n.label+' '+n.desc).toLowerCase().includes(q);return{id:n.id,hidden:off.has(n.group),opacity:hit?1:.15}}));}
+document.getElementById('search').oninput=applyFilter;
+document.getElementById('search').onkeydown=e=>{if(e.key==='Enter'){const q=e.target.value.toLowerCase();const n=graphData.nodes.find(n=>n.label.toLowerCase().includes(q));if(n)focusNode(n.id)}};
 
-  <div class="stats">
-    <div class="stat">
-      <div class="stat-value" id="node-count">0</div>
-      <div class="stat-label">Nodes</div>
-    </div>
-    <div class="stat">
-      <div class="stat-value" id="edge-count">0</div>
-      <div class="stat-label">Connections</div>
-    </div>
-    <div class="stat">
-      <div class="stat-value" id="skill-count">0</div>
-      <div class="stat-label">Skills</div>
-    </div>
-  </div>
+function focusNode(id){net.selectNodes([id]);net.focus(id,{scale:1.2,animation:{duration:600,easingFunction:'easeInOutQuad'}});show(id)}
+function show(id){const n=byId[id],g=C[n.group];
+ const conns=graphData.edges.filter(e=>e.from===id||e.to===id).map(e=>{const o=e.from===id?e.to:e.from;return`<li data-id="${o}">${byId[o].label} <em>~ ${e.label}</em></li>`}).join('');
+ document.getElementById('pbody').innerHTML=`<span class="tag" style="background:${g.color}33;color:${g.color}">${g.label}</span><h2>${n.label}</h2><p>${n.desc}</p>`+
+ (n.links.length?`<h3>Links</h3>`+n.links.map(([t,u])=>`<div><a href="${u}" target="_blank" rel="noopener">${t} ↗</a></div>`).join(''):'')+`<h3>Connections</h3><ul>${conns}</ul>`;
+ document.querySelectorAll('#pbody li').forEach(li=>li.onclick=()=>focusNode(li.dataset.id));
+ document.getElementById('panel').classList.add('open');}
+net.on('click',p=>{if(p.nodes.length)show(p.nodes[0]);else document.getElementById('panel').classList.remove('open')});
+document.getElementById('close').onclick=()=>document.getElementById('panel').classList.remove('open');
 
-  <div class="info-panel" id="info-panel">
-    <h3 id="panel-title">Select a node</h3>
-    <div class="type" id="panel-type"></div>
-    <div class="connections" id="panel-connections">Click any node to see details</div>
-  </div>
-
-  <script>
-    // ============================================
-    // INNERG SKILL GRAPH DATA
-    // Edit this section to customize your graph
-    // ============================================
-    
-    const graphData = {
-      nodes: [
-        // IDENTITY (Pink) - Core self nodes
-        { id: 'innergclaw', label: 'InnerGClaw', group: 'identity', size: 40, title: 'AI Agent Identity' },
-        { id: 'nasir', label: 'Nasir (Human)', group: 'identity', size: 35, title: 'Human Partner' },
-        { id: 'goals', label: 'Goals', group: 'identity', size: 25, title: 'Strategic Objectives' },
-        { id: 'philosophy', label: 'Philosophy', group: 'identity', size: 25, title: 'Core Beliefs' },
-        
-        // CORE SKILLS (Blue) - Your capabilities
-        { id: 'web-dev', label: 'Web Development', group: 'skill', size: 35, title: 'HTML/CSS/JS' },
-        { id: 'ai-orchestration', label: 'AI Orchestration', group: 'skill', size: 35, title: 'Agent Swarm Management' },
-        { id: 'automation', label: 'Automation', group: 'skill', size: 30, title: 'Workflow Automation' },
-        { id: 'design', label: 'Design Systems', group: 'skill', size: 28, title: 'UI/UX Design' },
-        { id: 'copywriting', label: 'Copywriting', group: 'skill', size: 25, title: 'Sales Copy & Content' },
-        { id: 'strategy', label: 'Strategy', group: 'skill', size: 28, title: 'Business Strategy' },
-        { id: 'research', label: 'Research', group: 'skill', size: 25, title: 'Deep Research' },
-        { id: 'trading', label: 'Trading Systems', group: 'skill', size: 22, title: 'Crypto/Stock Trading' },
-        
-        // PROJECTS (Green) - Active projects
-        { id: 'ownyourweb', label: 'OwnYourWeb', group: 'project', size: 35, title: 'Web Agency' },
-        { id: 'innerg-intel', label: 'InnerG Intel', group: 'project', size: 35, title: 'AI Community' },
-        { id: 'demos', label: 'Client Demos', group: 'project', size: 28, title: 'Demo Sites' },
-        { id: 'trading-bot', label: 'Trading Bot', group: 'project', size: 25, title: 'Automated Trading' },
-        { id: 'prompt-vault', label: 'Prompt Vault', group: 'project', size: 22, title: 'Digital Product' },
-        { id: 'ai-assembly', label: 'AI Assembly', group: 'project', size: 22, title: 'Agent Governance' },
-        
-        // TOOLS (Yellow) - Software/Stack
-        { id: 'openclaw', label: 'OpenClaw', group: 'tool', size: 30, title: 'Agent Platform' },
-        { id: 'github', label: 'GitHub', group: 'tool', size: 25, title: 'Code Repository' },
-        { id: 'telegram', label: 'Telegram', group: 'tool', size: 22, title: 'Messaging' },
-        { id: 'notion', label: 'Notion', group: 'tool', size: 20, title: 'Knowledge Base' },
-        { id: 'stripe', label: 'Stripe', group: 'tool', size: 20, title: 'Payments' },
-        { id: 'elevenlabs', label: 'ElevenLabs', group: 'tool', size: 18, title: 'Voice AI' },
-        
-        // CLIENTS (Orange) - Business relationships
-        { id: 'heavens-angels', label: 'Heavens Angels', group: 'client', size: 25, title: 'Childcare Demo' },
-        { id: 'kj-luxury', label: 'KJ Luxury', group: 'client', size: 25, title: 'Transportation Demo' },
-        { id: 'allyz-world', label: 'Allyz World', group: 'client', size: 22, title: 'Daycare Site' },
-        { id: 'ms-minnie', label: 'Ms Minnie', group: 'client', size: 22, title: 'Fashion Boutique' },
-        { id: 'blessed-by-bri', label: 'Blessed by Bri', group: 'client', size: 20, title: 'Hairstylist' },
-      ],
-      
-      edges: [
-        // Identity connections
-        { from: 'innergclaw', to: 'nasir', label: 'serves' },
-        { from: 'innergclaw', to: 'goals', label: 'drives' },
-        { from: 'innergclaw', to: 'philosophy', label: 'follows' },
-        { from: 'nasir', to: 'goals', label: 'sets' },
-        
-        // Skills to Identity
-        { from: 'innergclaw', to: 'web-dev', label: 'masters' },
-        { from: 'innergclaw', to: 'ai-orchestration', label: 'excels at' },
-        { from: 'innergclaw', to: 'automation', label: 'builds' },
-        { from: 'innergclaw', to: 'design', label: 'creates' },
-        { from: 'innergclaw', to: 'copywriting', label: 'writes' },
-        { from: 'innergclaw', to: 'strategy', label: 'plans' },
-        { from: 'innergclaw', to: 'research', label: 'conducts' },
-        { from: 'nasir', to: 'trading', label: 'manages' },
-        
-        // Projects to Skills
-        { from: 'ownyourweb', to: 'web-dev', label: 'uses' },
-        { from: 'ownyourweb', to: 'design', label: 'applies' },
-        { from: 'ownyourweb', to: 'copywriting', label: 'needs' },
-        { from: 'ownyourweb', to: 'strategy', label: 'requires' },
-        { from: 'innerg-intel', to: 'ai-orchestration', label: 'showcases' },
-        { from: 'innerg-intel', to: 'community', label: 'builds' },
-        { from: 'demos', to: 'web-dev', label: 'built with' },
-        { from: 'demos', to: 'design', label: 'styled by' },
-        { from: 'trading-bot', to: 'trading', label: 'automates' },
-        { from: 'trading-bot', to: 'automation', label: 'uses' },
-        { from: 'prompt-vault', to: 'copywriting', label: 'contains' },
-        { from: 'ai-assembly', to: 'ai-orchestration', label: 'governs' },
-        
-        // Tools to Skills
-        { from: 'web-dev', to: 'github', label: 'hosted on' },
-        { from: 'automation', to: 'openclaw', label: 'powered by' },
-        { from: 'ai-orchestration', to: 'openclaw', label: 'uses' },
-        { from: 'innergclaw', to: 'telegram', label: 'operates on' },
-        { from: 'strategy', to: 'notion', label: 'documented in' },
-        { from: 'ownyourweb', to: 'stripe', label: 'collects via' },
-        { from: 'innerg-intel', to: 'elevenlabs', label: 'voices with' },
-        
-        // Clients to Projects
-        { from: 'heavens-angels', to: 'demos', label: 'demo for' },
-        { from: 'heavens-angels', to: 'ownyourweb', label: 'potential' },
-        { from: 'kj-luxury', to: 'demos', label: 'demo for' },
-        { from: 'allyz-world', to: 'ownyourweb', label: 'client of' },
-        { from: 'ms-minnie', to: 'demos', label: 'demo for' },
-        { from: 'blessed-by-bri', to: 'demos', label: 'demo for' },
-        
-        // Cross-project connections
-        { from: 'innerg-intel', to: 'ownyourweb', label: 'feeds' },
-        { from: 'demos', to: 'ownyourweb', label: 'converts to' },
-        { from: 'prompt-vault', to: 'innerg-intel', label: 'product for' },
-      ]
-    };
-
-    // Group colors
-    const groupColors = {
-      identity: { background: '#ff6b9d', border: '#e91e63' },
-      skill: { background: '#00d4ff', border: '#0091ea' },
-      project: { background: '#00ff88', border: '#00c853' },
-      tool: { background: '#ffd93d', border: '#ffab00' },
-      client: { background: '#ff8c42', border: '#e65100' }
-    };
-
-    // ============================================
-    // VISUALIZATION SETUP
-    // ============================================
-
-    const nodes = new vis.DataSet(
-      graphData.nodes.map(node => ({
-        ...node,
-        color: groupColors[node.group],
-        font: { color: '#fff', size: 14, face: 'SF Pro Display' },
-        borderWidth: 2,
-        shadow: {
-          enabled: true,
-          color: groupColors[node.group].background,
-          size: 10,
-          x: 0,
-          y: 0
-        }
-      }))
-    );
-
-    const edges = new vis.DataSet(
-      graphData.edges.map(edge => ({
-        ...edge,
-        color: { color: 'rgba(255,255,255,0.2)', highlight: '#00ff88' },
-        font: { color: '#666', size: 10, align: 'middle' },
-        smooth: { type: 'continuous' },
-        width: 1,
-        arrows: { to: { enabled: true, scaleFactor: 0.5 } }
-      }))
-    );
-
-    const container = document.getElementById('graph-container');
-    const data = { nodes, edges };
-    
-    const options = {
-      nodes: {
-        shape: 'dot',
-        font: {
-          size: 14,
-          face: 'SF Pro Display',
-          color: '#ffffff',
-          strokeWidth: 0,
-          vadjust: -35
-        },
-        borderWidth: 2,
-        shadow: true
-      },
-      edges: {
-        width: 1,
-        color: { inherit: 'from' },
-        smooth: {
-          type: 'continuous',
-          roundness: 0.5
-        },
-        arrows: {
-          to: { enabled: true, scaleFactor: 0.5 }
-        }
-      },
-      physics: {
-        enabled: true,
-        barnesHut: {
-          gravitationalConstant: -3000,
-          centralGravity: 0.3,
-          springLength: 150,
-          springConstant: 0.04,
-          damping: 0.09,
-          avoidOverlap: 0.5
-        },
-        stabilization: { iterations: 150 }
-      },
-      interaction: {
-        hover: true,
-        tooltipDelay: 200,
-        hideEdgesOnDrag: false
-      }
-    };
-
-    const network = new vis.Network(container, data, options);
-
-    // ============================================
-    // INTERACTION HANDLERS
-    // ============================================
-
-    let physicsEnabled = true;
-
-    network.on("click", function (params) {
-      if (params.nodes.length > 0) {
-        const nodeId = params.nodes[0];
-        const node = nodes.get(nodeId);
-        const connectedEdges = graphData.edges.filter(e => e.from === nodeId || e.to === nodeId);
-        
-        showInfoPanel(node, connectedEdges);
-      } else {
-        hideInfoPanel();
-      }
-    });
-
-    function showInfoPanel(node, connectedEdges) {
-      const panel = document.getElementById('info-panel');
-      const title = document.getElementById('panel-title');
-      const type = document.getElementById('panel-type');
-      const connections = document.getElementById('panel-connections');
-      
-      title.textContent = node.label;
-      type.textContent = node.group;
-      type.style.background = groupColors[node.group].background;
-      type.style.color = '#000';
-      
-      let connectionsHTML = `<strong>${connectedEdges.length} connections:</strong><br>`;
-      connectedEdges.forEach(edge => {
-        const isOutgoing = edge.from === node.id;
-        const otherNode = nodes.get(isOutgoing ? edge.to : edge.from);
-        const arrow = isOutgoing ? '→' : '←';
-        connectionsHTML += `${arrow} ${otherNode.label} (${edge.label})<br>`;
-      });
-      connections.innerHTML = connectionsHTML;
-      
-      panel.classList.add('active');
-    }
-
-    function hideInfoPanel() {
-      document.getElementById('info-panel').classList.remove('active');
-    }
-
-    function resetView() {
-      network.fit({
-        animation: {
-          duration: 1000,
-          easingFunction: 'easeInOutQuad'
-        }
-      });
-    }
-
-    function togglePhysics() {
-      physicsEnabled = !physicsEnabled;
-      network.setOptions({ physics: { enabled: physicsEnabled } });
-    }
-
-    function exportData() {
-      const dataStr = JSON.stringify(graphData, null, 2);
-      const blob = new Blob([dataStr], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'innerg-skill-graph.json';
-      a.click();
-    }
-
-    // Update stats
-    document.getElementById('node-count').textContent = graphData.nodes.length;
-    document.getElementById('edge-count').textContent = graphData.edges.length;
-    document.getElementById('skill-count').textContent = 
-      graphData.nodes.filter(n => n.group === 'skill').length;
-
-    // Initial fit
-    network.once("stabilizationIterationsDone", function() {
-      network.fit();
-    });
-  </script>
+// competency (radial) view: Nas at center, rings by group
+const rings={core:0.7,skill:1.4,venture:2.2,agent:3,client:3.7,tool:4.4,legacy:5};
+function setRadial(on){radial=on;document.getElementById('viewBtn').classList.toggle('on',on);document.getElementById('viewBtn').textContent=on?'Network view':'Competency view';
+ if(on){net.setOptions({physics:{enabled:false}});net.stopSimulation();const by={};graphData.nodes.forEach(n=>(by[rings[n.group]]=by[rings[n.group]]||[]).push(n));
+  Object.entries(by).forEach(([r,arr])=>arr.forEach((n,i)=>{const R=r*230,a=(i/arr.length)*2*Math.PI+r*.6;n.id==='nas'?net.moveNode(n.id,0,0):net.moveNode(n.id,R*Math.cos(a),R*Math.sin(a))}));
+  edgesDS.update(graphData.edges.map((e,i)=>({id:i,hidden:!(e.from==='nas'||e.from==='intel'||e.from==='oyw'||e.from==='marrow')})));
+  net.fit({animation:{duration:700}})}
+ else{edgesDS.update(graphData.edges.map((e,i)=>({id:i,hidden:false})));net.setOptions({physics:{enabled:physics}});net.stabilize(150)}}
+document.getElementById('viewBtn').onclick=()=>setRadial(!radial);
+document.getElementById('physBtn').onclick=e=>{physics=!physics;net.setOptions({physics:{enabled:physics&&!radial}});e.target.textContent=physics?'Freeze':'Unfreeze';e.target.classList.toggle('on',!physics)};
+document.getElementById('resetBtn').onclick=()=>{off.clear();document.querySelectorAll('.lg').forEach(d=>d.classList.remove('off'));document.getElementById('search').value='';applyFilter();setRadial(false);net.fit({animation:true})};
+document.getElementById('exportBtn').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(graphData,null,2)],{type:'application/json'}));a.download='innerg-skill-graph.json';a.click()};
+document.getElementById('stats').textContent=`${graphData.nodes.length} nodes ~ ${graphData.edges.length} connections`;
+net.once('stabilizationIterationsDone',()=>net.fit());
+</script>
 </body>
 </html>
